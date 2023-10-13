@@ -17,17 +17,20 @@ all: get_tasks
 
 get_tasks: *.c
 	@make clean_targets >/dev/null
-	@{ [ -s "main.c" ] && make --no-print-directory main; }
-	@{ [ -n "$$(find tests/*.c)" ] && make --no-print-directory tests_run; }
-	@make clean >/dev/null
+	@{ \
+		[ -s "main.c" ] && make --no-print-directory main && \
+		[ -n "$$(find tests/*.c)" ] && make --no-print-directory tests_run; \
+	}
 
 get_tasks_debug: *.c
 	@make clean_all >/dev/null
-	@{ [ -s "main.c" ] && make --no-print-directory debug; }
-	@{ [ -n "$$(find tests/*.c)" ] && make --no-print-directory tests_run; }
-	@make clean_all >/dev/null
+	@{ \
+		[ -s "main.c" ] && make --no-print-directory debug && \
+		[ -n "$$(find tests/*.c)" ] && make --no-print-directory tests_run; \
+	}
 
 review:
+	@clear
 	@make --no-print-directory get_tasks_debug
 	@echo -en '\e[A'
 	@make --no-print-directory coverage
@@ -81,6 +84,8 @@ debug: *.c lib/my/libmy.a
 	@echo -e '\e[s\n\e[u\e[33;1m\e[B▲\e[0m\n'
 
 test: tests_run
+tests/*.gcno: tests_run
+tests/*.gcda: tests_run
 
 tests_run: *.c tests/*.c lib/my/libmy.a
 	@echo -e '\n\e[34;1m==> TARGET: tests_run\e[0m\n'
@@ -122,7 +127,7 @@ exec_params_debug: main
 # CODE COVERAGE #
 #################
 
-coverage: tests/unit_tests tests/*.gcno tests/*.gcda
+coverage: tests/*.gcno tests/*.gcda
 	@echo -e '\n\e[34;1m==> TARGET: coverage\e[0m\n'
 	@{ \
  		output=$$(gcovr --exclude tests | tail -n+5); \
