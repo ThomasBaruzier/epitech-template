@@ -2,7 +2,7 @@
 ** EPITECH PROJECT, 2023
 ** my_add.c
 ** File description:
-** Add two number together
+** Add two numbers together
 */
 
 #include "my.h"
