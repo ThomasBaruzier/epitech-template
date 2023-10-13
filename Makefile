@@ -6,24 +6,33 @@
 ##
 
 CC=gcc
-CFLAGS= -Wall -Wextra
-#CFLAGS= -Wall -Wextra -Ofast -march=native -flto
+CFLAGS= -Wall -Wextra -Werror
+#CFLAGS= -Wall -Wextra -Werror -Ofast -march=native -flto
 
-all: main
+all: get_tasks
 
-########
-# MAIN #
-########
+####################
+# HIGH LEVEL TASKS #
+####################
 
-main: *.c lib/my/libmy.a
-	@echo -e '\n\e[34;1m==> TARGET: main\e[0m\n'
-	$(CC) $(CFLAGS) *.c -c -I./include/
-	$(CC) $(CFLAGS) *.o -o main -L./lib/my/ -lmy
-	@echo -e '\n\e[32;1m==> SUCCESS: Built main!\e[0m\n'
-	@echo -e '\e[0;1mExecuting ./main...\n\e[33m▼\e[0m'
-	@./main
-	@echo -e '\e[s\n\e[u\e[33;1m\e[B▲\e[0m\n'
+get_tasks: *.c
+	@make clean_targets >/dev/null
+	@{ [ -s "main.c" ] && make --no-print-directory main; }
+	@{ [ -n "$$(find tests/*.c)" ] && make --no-print-directory tests_run; }
 	@make clean >/dev/null
+
+get_tasks_debug: *.c
+	@make clean_all >/dev/null
+	@{ [ -s "main.c" ] && make --no-print-directory debug; }
+	@{ [ -n "$$(find tests/*.c)" ] && make --no-print-directory tests_run; }
+	@make clean_all >/dev/null
+
+review:
+	@make --no-print-directory get_tasks_debug
+	@echo -en '\e[A'
+	@make --no-print-directory coverage
+	@echo -en '\e[A'
+	@make --no-print-directory banana
 
 live: *.c
 	@echo -e '\n\e[0;1m==> INFO: Live mode activated.\e[0m'
@@ -32,10 +41,55 @@ live: *.c
 		while true; do \
 			new=$$(cat $$(find -name '*.c' -o -name '*.h') | md5sum); \
 			[ "$$previous" != "$$new" ] && previous="$$new" && \
-			echo -en '\e[A' && make --no-print-directory main; \
+			echo -en '\e[A' && make --no-print-directory get_tasks; \
 			sleep 0.5; \
 		done \
 	}
+
+live_debug: *.c
+	@echo -e '\n\e[0;1m==> INFO: Live mode activated.\e[0m'
+	@{ \
+		trap "echo -e '\e[?25h' && exit" 2 3 && echo -e '\e[?25l'; \
+		while true; do \
+			new=$$(cat $$(find -name '*.c' -o -name '*.h') | md5sum); \
+			[ "$$previous" != "$$new" ] && previous="$$new" && \
+			echo -en '\e[A' && make --no-print-directory get_tasks_debug; \
+			sleep 0.5; \
+		done \
+	}
+
+############
+# BUILDING #
+############
+
+main: *.c lib/my/libmy.a
+	@echo -e '\n\e[34;1m==> TARGET: main\e[0m\n'
+	$(CC) $(CFLAGS) *.c -c -I./include/
+	$(CC) $(CFLAGS) *.o -o main -L./lib/my/ -lmy
+	@echo -e '\n\e[32;1m==> SUCCESS: Built main!\e[0m\n'
+	@echo -e '\e[0;1mExecuting ./main...\n\e[33m▼\e[0m'
+	@make --no-print-directory exec_params
+	@echo -e '\e[s\n\e[u\e[33;1m\e[B▲\e[0m\n'
+
+debug: *.c lib/my/libmy.a
+	@echo -e '\n\e[34;1m==> TARGET: debug\e[0m\n'
+	$(CC) $(CFLAGS) *.c -c -I./include/
+	$(CC) $(CFLAGS) *.o -o main -L./lib/my/ -lmy
+	@echo -e '\n\e[32;1m==> SUCCESS: Built main!\e[0m\n'
+	@echo -e '\e[0;1mExecuting ./main in debugging mode...\n\e[33m▼\e[0m'
+	@make --no-print-directory exec_params_debug
+	@echo -e '\e[s\n\e[u\e[33;1m\e[B▲\e[0m\n'
+
+test: tests_run
+
+tests_run: *.c tests/*.c lib/my/libmy.a
+	@echo -e '\n\e[34;1m==> TARGET: tests_run\e[0m\n'
+	$(CC) $(CFLAGS) $$(ls *.c | grep -v main.c) tests/*.c -o tests/unit_tests \
+		-I./include/ -L./lib/my/ -lcriterion -lmy --coverage
+	@echo -e '\n\e[32;1m==> SUCCESS: Built tests_run!\e[0m\n'
+	@echo -e '\e[0;1mExecuting ./tests/unit_tests...\e[0m\n'
+	@./tests/unit_tests
+	@echo
 
 #########
 # LIBMY #
@@ -48,26 +102,25 @@ lib/my/libmy.a: ./lib/my/*.c ./lib/my/build.sh
 	@cd lib/my && ./build.sh && cd ../..
 	@echo -e '\n\e[32;1m==> SUCCESS: Built libmy!\e[0m\n'
 
-#########
-# TESTS #
-#########
+########
+# EXEC #
+########
 
-test:
-	@make --no-print-directory clean_all >/dev/null
-	@make --no-print-directory tests_run
-	@echo -en '\e[A'
-	@make --no-print-directory coverage
-	@echo -en '\e[A'
-	@make --no-print-directory banana
+exec: main
+	@./main
 
-tests_run: *.c tests/*.c lib/my/libmy.a
-	@echo -e '\n\e[34;1m==> TARGET: tests_run\e[0m\n'
-	$(CC) $(CFLAGS) $$(ls *.c | grep -v main.c) tests/*.c -o tests/unit_tests \
-        -I./include/ -L./lib/my/ -lcriterion -lmy --coverage
-	@echo -e '\n\e[32;1m==> SUCCESS: Built tests_run!\e[0m\n'
-	@echo -e '\e[0;1mExecuting ./tests/unit_tests...\e[0m\n'
-	@./tests/unit_tests
-	@echo
+exec_params: main
+	@./main "This is an arg built into the Makefile" "second" "third"
+
+exec_debug: main
+	@./main | cat -e
+
+exec_params_debug: main
+	@./main "This is an arg built into the Makefile" "second" "third" | cat -e
+
+#################
+# CODE COVERAGE #
+#################
 
 coverage: tests/unit_tests tests/*.gcno tests/*.gcda
 	@echo -e '\n\e[34;1m==> TARGET: coverage\e[0m\n'
@@ -131,10 +184,14 @@ banana:
 
 clean_all:
 	@make --no-print-directory clean_lib
+	@make --no-print-directory clean_targets
 	@make --no-print-directory clean
 
 clean_lib:
 	rm -f lib/*/*.o lib/*/*.a
 
+clean_targets:
+	rm -f main tests/unit_tests
+
 clean:
-	rm -f main *.o tests/unit_tests tests/*.gcno tests/*.gcda
+	rm -f *.o tests/*.gcno tests/*.gcda
