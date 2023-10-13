@@ -26,14 +26,12 @@ get_tasks_debug: *.c
 	@make clean_all >/dev/null
 	@{ \
 		[ -s "main.c" ] && make --no-print-directory debug && \
-		[ -n "$$(find tests/*.c)" ] && make --no-print-directory tests_run; \
+		[ -n "$$(find tests/*.c)" ] && make --no-print-directory coverage; \
 	}
 
 review:
 	@clear
 	@make --no-print-directory get_tasks_debug
-	@echo -en '\e[A'
-	@make --no-print-directory coverage
 	@echo -en '\e[A'
 	@make --no-print-directory banana
 
