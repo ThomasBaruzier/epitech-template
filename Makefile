@@ -139,7 +139,6 @@ include/functions.h:
 	}
 	@echo -e '\e[0;1m==> Header file functions.h automatically generated\e[0m'
 
-
 #################
 # CODE COVERAGE #
 #################
