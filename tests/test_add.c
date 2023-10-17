@@ -5,8 +5,10 @@
 ** Placeholder
 */
 
-#include "my.h"
 #include <criterion/criterion.h>
+
+#include "my.h"
+#include "functions.h"
 
 Test (my_add, test_my_add_function)
 {

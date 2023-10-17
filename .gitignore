@@ -1,8 +1,9 @@
+my.h
 main.c
-Makefile
+functions.h
 unit_tests
 *.gcno 
 *.gcda
+*.out
 *.o
 *.a
-*.out
