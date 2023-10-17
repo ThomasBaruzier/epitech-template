@@ -139,6 +139,7 @@ include/functions.h:
 	}
 	@echo -e '\e[0;1m==> Header file functions.h automatically generated\e[0m'
 
+
 #################
 # CODE COVERAGE #
 #################
@@ -149,17 +150,17 @@ coverage: tests/*.gcno tests/*.gcda
  		output=$$(gcovr --exclude tests | tail -n+5); \
 		output=$$(head -n-3 <<< "$$output" | grep -v 100%); \
 		if [ $$(wc -l <<< "$$output") -le 2 ]; then \
- 		   echo -e "> \e[0;1m100% Line coverage\e[0m\n"; \
- 	   else \
- 		   echo -e "$$output\n"; \
- 	   fi; \
- 	   output=$$(gcovr --exclude tests --branches | tail -n+5); \
- 	   output=$$(head -n-3 <<< "$$output" | grep -v 100%); \
- 	   if [ $$(wc -l <<< "$$output") -le 2 ]; then \
- 		   echo -e "> \e[0;1m100% Branch coverage\e[0m"; \
- 	   else \
- 		   echo "$$output"; \
- 	   fi \
+ 		  echo -e "> \e[0;1m100% Line coverage\e[0m\n"; \
+ 	  else \
+ 		  echo -e "$$output\n"; \
+ 	  fi; \
+ 	  output=$$(gcovr --exclude tests --branches | tail -n+5); \
+ 	  output=$$(head -n-3 <<< "$$output" | grep -v 100%); \
+ 	  if [ $$(wc -l <<< "$$output") -le 2 ]; then \
+ 		  echo -e "> \e[0;1m100% Branch coverage\e[0m"; \
+ 	  else \
+ 		  echo "$$output"; \
+ 	  fi \
 	}
 	@echo
 
@@ -178,7 +179,7 @@ banana: fclean
 			ghcr.io/epitech/coding-style-checker:latest \
 			/mnt/delivery /mnt/reports; \
 		export_file=$$(find "$$output" -type f | head -n 1); \
-#		sed -i '/illegal token in column/d' "$$export_file"; \
+		sed -i '/illegal token in column/d' "$$export_file"; \
 		if [ -f "$$export_file" ]; then \
 			errors=$$(wc -l < "$$export_file"); \
 			fatal=$$(grep -c 'FATAL' < "$$export_file"); \
@@ -204,8 +205,8 @@ banana: fclean
 re: fclean all
 
 fclean: clean
-	rm -f main tests/unit_tests lib/*/*.o lib/*/*.a lib/*.a \
-	lib/my/my.h include/my.h include/functions.h
+	rm -f main tests/unit_tests lib/*/*.o lib/*/*.a lib/*.a
+	rm -f lib/my/my.h include/my.h include/functions.h
 
 clean:
 	rm -f *.o */*.o */*/*.o tests/*.gcno tests/*.gcda
