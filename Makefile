@@ -167,7 +167,8 @@ coverage: tests/*.gcno tests/*.gcda
 # BANANA #
 ##########
 
-banana: fclean
+banana:
+	@make --no-print-directory fclean
 	@{ \
 		input="$$PWD"; \
 		output="/home/$$USER/.cache/coding-style-checker"; \
