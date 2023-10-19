@@ -69,8 +69,8 @@ main: *.c lib/libmy.a include/functions.h
 
 debug: *.c lib/libmy.a include/functions.h
 	@echo -e '\n\e[34;1m==> TARGET: debug\e[0m\n'
-	$(CC) $(CFLAGS) *.c -c -I./include/
-	$(CC) $(CFLAGS) *.o -o main -L./lib/ -lmy
+	$(CC) $(CFLAGS) *.c -g -c -I./include/
+	$(CC) $(CFLAGS) *.o -g -o main -L./lib/ -lmy
 	@echo -e '\n\e[32;1m==> SUCCESS: Built main!\e[0m\n'
 	@echo -e '\e[0;1mExecuting ./main in debugging mode...\n\e[33m▼\e[0m'
 	@make --no-print-directory exec_params_debug
